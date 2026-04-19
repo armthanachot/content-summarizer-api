@@ -1,7 +1,7 @@
 import S3Util from "../../pkg/utils/s3"
 import ENV from "../../pkg/env/env"
 import { PresetsThemeResponse } from "./model/res"
-import { ThemeStructureRequest } from "./model/req"
+import { ThemeStructureRequest, TThemeStructureRequest } from "./model/req"
 import { Value } from '@sinclair/typebox/value'
 import fs from 'fs'
 import path from 'path'
@@ -12,7 +12,17 @@ class S3Service {
         try {
             await this.validateThemeStructure(file)
             const response = await S3Util.uploadFile(file, fileName, ENV.THEME_BUCKET_NAME, true)
-            console.log(response)
+            await this.updatePresets(response.path)
+            return true
+        } catch (error) {
+            console.error(error)
+            return false
+        }
+    }
+
+    async uploadJSONTheme(theme: TThemeStructureRequest){
+        try {
+            const response = await S3Util.uploadFile(new File([JSON.stringify(theme)], theme.sourceFile, { type: "application/json" }), theme.sourceFile, ENV.THEME_BUCKET_NAME, true)
             await this.updatePresets(response.path)
             return true
         } catch (error) {
@@ -49,8 +59,6 @@ class S3Service {
 
         //upload presets to s3
         const response = await S3Util.uploadFile(new File([await fs.readFileSync(filePath)], filePath, { type: "application/json" }), "presets.json", ENV.THEME_BUCKET_NAME, true)
-        console.log(response)
-
         return true
     }
 }
