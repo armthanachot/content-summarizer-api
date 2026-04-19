@@ -1,9 +1,10 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import ENV from '../env/env';
 
 class S3Util {
     private supabase: SupabaseClient
     constructor() {
-        this.supabase = createClient(process.env.PROJECT_URL!, process.env.API_KEY!)
+        this.supabase = createClient(ENV.PROJECT_URL!, ENV.API_KEY!)
     }
 
     async uploadFile(file: File, fileName: string, bucketName: string, overwrite: boolean = false) {
